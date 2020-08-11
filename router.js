@@ -24,27 +24,48 @@ module.exports = function(app) {
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
         'Access-Control-Allow-Headers': 'X-Requested-With,content-type,Accept',
 	  })
-	  countdown(res, 12)
+	  countdown(res, 50)
 	})
 
 	function countdown(res, count) {
 
-	  let id = Math.floor(Math.random() * Math.floor(count));
-	  let randomStatusId = Math.floor(Math.random() * Math.floor(3));
+	  let id = Math.floor(Math.random() * Math.floor(12));
+	  let randomStatusId = Math.floor(Math.random() * Math.floor(4));
 
-	  let connections = ["not connected", "error", "connected"];
-	  let activities = ["idle", "transmitting", "receiving"];
+	  let connections = ["not connected", "error", "connected", "idle"];
+	  let activities = ["idle", "transmitting", "receiving", "error"];
 
 	  const obj = JSON.stringify({ circuit_id: id, action: "update_circuit_status", value: connections[randomStatusId] });
 	  const obj2 = JSON.stringify({ circuit_id: id, action: "update_circuit_activity", value: activities[randomStatusId] });
 	
 	  res.write("data: "+obj+"\n\n");
 	  res.write("data: "+obj2+"\n\n");
-	  res.flush();
+	  res.flushHeaders();
 	  if (count > 1)
-	    setTimeout(() => countdown(res, count-1), 1000)
+	    setTimeout(() => countdown(res, count-1), 500)
 	  else
 	    res.end()
+	}
+
+	app.get('/notifications', function(req, res) {
+	  res.writeHead(200, {
+	  	Connection: "keep-alive",
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Access-Control-Allow-Origin": "*",
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, PUT, PATCH, DELETE',
+        'Access-Control-Allow-Headers': 'X-Requested-With,content-type,Accept',
+	  })
+	  notifications(res, 50)
+	})
+
+	function notifications(res, count) {
+		res.write("data: notification"+"\n\n");
+	  	res.flushHeaders();
+		if (count > 1)
+	    	setTimeout(() => notifications(res, count-1), 500)
+	  	else
+	    	res.end()
 	}
 
 }
